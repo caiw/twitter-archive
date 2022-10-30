@@ -5,7 +5,7 @@ from datetime import datetime
 from dateutil.parser import parse as dt_parse
 from bs4 import BeautifulSoup
 
-from entities import ShortenedURL, UserMention, Entity
+from entities import ShortenedURL, UserMention, Entity, Media
 
 
 class Tweet:
@@ -32,6 +32,7 @@ class Tweet:
             self.reply_to_userid = None
 
         # Entitles
+        # URLs
         self.shortened_urls: list[ShortenedURL]
         try:
             self.shortened_urls = [ShortenedURL(url) for url in self.dict["entities"]["urls"]]
@@ -43,6 +44,21 @@ class Tweet:
             self.user_mentions = [UserMention(mention) for mention in self.dict["entities"]["user_mentions"]]
         except KeyError:
             self.user_mentions = []
+        # Media
+        self.media: list[Media]
+        try:
+            self.media = [Media(image, parent_tweet_id=self.id) for image in self.dict["entities"]["media"]]
+        except KeyError:
+            self.media = []
+
+    @property
+    def entities(self) -> list[Entity]:
+        return sorted(
+            self.shortened_urls
+            + self.user_mentions
+            + self.media,
+            key=lambda e: e.indices[0]
+        )
 
     @property
     def is_reply(self) -> bool:
@@ -66,9 +82,7 @@ class Tweet:
     def full_text_repaired(self) -> str:
         s = self.full_text_unrepaired
         # Replace entities in reverse order
-        entities: list[Entity] = self.shortened_urls + self.user_mentions
-        entities = sorted(entities, key=lambda e: e.indices[0], reverse=True)
-        for entity in entities:
+        for entity in reversed(self.entities):
             s = entity.replace_in_string(s)
         return s
 

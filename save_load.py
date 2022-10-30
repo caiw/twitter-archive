@@ -13,7 +13,7 @@ def load_tweets_from_twitterjs(tw_js_path: Path) -> list[Tweet]:
         return [Tweet(d) for d in tweets_js]
 
 
-def save_tweets(tweets: list[Tweet], to_path: Path) -> None:
+def save_tweets_as_text(tweets: list[Tweet], to_path: Path) -> None:
     s = "\n\n".join(t.to_str() for t in tweets) + "\n"
     with to_path.open("w") as out_file:
         out_file.write(s)

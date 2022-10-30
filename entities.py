@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 
 class Entity(ABC):
@@ -38,3 +39,32 @@ class UserMention(Entity):
         new_s += "@" + self.username
         new_s += s[self.indices[1]:]
         return new_s
+
+
+class Media(ShortenedURL):
+    def __init__(self, d: dict, parent_tweet_id: int):
+        super().__init__(d)
+        self.id: int = int(d["id"])
+        self.url_original: str = d["media_url_https"]
+        self.parent_tweet_id: int = parent_tweet_id
+        self.name: str = self._get_name(from_url=self.url_original)
+        self.extension: str = self._get_extension(from_url=self.url_original)
+
+    @property
+    def url_localised(self) -> str:
+        extension = self.url_original[-3:]
+        return f"tweets_media/{self.parent_tweet_id}-{self.name}.{extension}"
+
+    def replace_in_string(self, s: str) -> str:
+        new_s = s[:self.indices[0]]
+        new_s += self.url_localised
+        new_s += s[self.indices[1]:]
+        return new_s
+
+    @classmethod
+    def _get_name(cls, from_url: str) -> str:
+        return Path(from_url).stem
+
+    @classmethod
+    def _get_extension(cls, from_url: str):
+        return Path(from_url).suffix
