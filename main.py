@@ -22,7 +22,8 @@ def main(dirs: list[str]):
             t for t in new_tweets
             if not t.is_retweet
             and not t.is_quotetweet
-            and not t.is_reply)
+            and not t.is_at_message
+        )
     sorted_tweets: list[Tweet] = sorted(tweets, key=lambda t: t.timestamp, reverse=True)
     save_tweets_as_text(sorted_tweets, to_path=Path(output_dir, "test.txt"))
     save_tweets_as_html(sorted_tweets, to_path=Path(output_dir, "test.html"))

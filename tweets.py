@@ -81,6 +81,10 @@ class Tweet:
         )
 
     @property
+    def is_at_message(self) -> bool:
+        return self.reply_to_userid is not None
+
+    @property
     def is_reply(self) -> bool:
         return self.reply_to_tweet_id is not None
 
@@ -130,19 +134,36 @@ class Tweet:
         return s
 
     def to_div(self, doc: Document):
-        div = doc.createElement("div")
+        tweet = doc.createElement("div")
+        tweet.setAttribute("class", "tweet")
+        tweet.setAttribute("id", f"tweet{self.id}")
+        # Reply
+        if self.is_at_message and not self.reply_to_username == "caiwingfield":
+            reply_note = doc.createElement("div")
+            reply_note.setAttribute("class", "reply-note")
+            if self.is_reply:
+                # Repy to direct tweet
+                reply_note.appendChild(parseString(
+                    f'<p>In reply to <a href="https://twitter.com/{self.reply_to_username}/status/{self.reply_to_tweet_id}">@{self.reply_to_username}</a></p>'
+                ).documentElement)
+            # else:
+            #     # Just @-message
+            #     reply_note.appendChild(parseString(
+            #         f'<p>In reply to <a href="https://twitter.com/{self.reply_to_username}">@{self.reply_to_username}</a></p>'
+            #     ).documentElement)
+            tweet.appendChild(reply_note)
         # Tweet p
         p = parseString("<p>"+self.full_text_repaired_as_html(doc)+"</p>").documentElement
-        div.appendChild(p)
+        tweet.appendChild(p)
         # Images
         for m in self.media:
-            div.appendChild(m.as_tag(doc))
+            tweet.appendChild(m.as_tag(doc))
         # Date
         date = doc.createElement("div")
         date.setAttribute("class", "timestamp")
         date.appendChild(doc.createTextNode(str(self.timestamp)))
-        div.appendChild(date)
-        return div
+        tweet.appendChild(date)
+        return tweet
 
     @classmethod
     def _parse_time(cls, time_str: str) -> datetime:
