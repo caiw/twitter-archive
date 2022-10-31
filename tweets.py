@@ -111,10 +111,17 @@ class Tweet:
 
     def to_div(self, doc: Document):
         div = doc.createElement("div")
+        # Tweet p
         p = parseString("<p>"+self.full_text_repaired_as_html(doc)+"</p>").documentElement
         div.appendChild(p)
+        # Images
         for m in self.media:
             div.appendChild(m.as_tag(doc))
+        # Date
+        date = doc.createElement("div")
+        date.setAttribute("class", "timestamp")
+        date.appendChild(doc.createTextNode(str(self.timestamp)))
+        div.appendChild(date)
         return div
 
     @classmethod
