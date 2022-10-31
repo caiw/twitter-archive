@@ -11,49 +11,69 @@ from entities import ShortenedURL, UserMention, Entity, Media
 
 class Tweet:
     def __init__(self, d: dict):
-        self.dict: dict = d["tweet"]
-        self.id: int = int(self.dict['id'])
-        self.timestamp: datetime = self._parse_time(self.dict['created_at'])
-        self.source: str = self._parse_source(self.dict['source'])
-        self.favourites: int = int(self.dict['favorite_count'])
-        self.retweets: int = int(self.dict['retweet_count'])
-        self.full_text_unrepaired: str = self.dict['full_text']
+        self._dict: dict = d["tweet"]
 
-        # Reply
-        self.reply_to_id: int | None
-        self.reply_to_username: str | None
-        self.reply_to_userid: int | None
-        try:
-            self.reply_to_tweet_id = int(self.dict['in_reply_to_status_id'])
-            self.reply_to_username = self.dict["in_reply_to_screen_name"]
-            self.reply_to_userid = int(self.dict["in_reply_to_user_id_str"])
-        except KeyError:
-            self.reply_to_tweet_id = None
-            self.reply_to_username = None
-            self.reply_to_userid = None
+    @property
+    def id(self) -> int: return int(self._dict['id'])
 
-        # Entitles
-        # URLs
-        self.shortened_urls: list[ShortenedURL]
-        try:
-            self.shortened_urls = [ShortenedURL(url) for url in self.dict["entities"]["urls"]]
-        except KeyError:
-            self.shortened_urls = []
-        # Mentions
-        self.user_mentions: list[UserMention]
-        try:
-            self.user_mentions = [UserMention(mention) for mention in self.dict["entities"]["user_mentions"]]
-        except KeyError:
-            self.user_mentions = []
-        # Media
-        self.media: list[Media]
-        try:
-            self.media = [Media(image, parent_tweet_id=self.id) for image in self.dict["entities"]["media"]]
-        except KeyError:
-            self.media = []
+    @property
+    def timestamp(self) -> datetime: return self._parse_time(self._dict['created_at'])
+
+    @property
+    def source(self) -> str: return self._parse_source(self._dict['source'])
+
+    @property
+    def favourites(self) -> int: return int(self._dict['favorite_count'])
+
+    @property
+    def retweets(self) -> int: return int(self._dict['retweet_count'])
+
+    @property
+    def full_text_unrepaired(self) -> str: return self._dict['full_text']
+
+    # Reply
+
+    @property
+    def reply_to_tweet_id(self) -> int | None:
+        try: return int(self._dict['in_reply_to_status_id'])
+        except KeyError: return None
+
+    @property
+    def reply_to_username(self) -> str | None:
+        try: return self._dict["in_reply_to_screen_name"]
+        except KeyError: return None
+
+    @property
+    def reply_to_userid(self) -> int | None:
+        try: return int(self._dict["in_reply_to_user_id"])
+        except KeyError: return None
+
+    # Entities
+
+    # URLs
+    @property
+    def shortened_urls(self) -> list[ShortenedURL]:
+        try: return [ShortenedURL(url) for url in
+                     self._dict["entities"]["urls"]]
+        except KeyError: return []
+
+    # Mentions
+    @property
+    def user_mentions(self) -> list[UserMention]:
+        try: return [UserMention(mention) for mention in
+                     self._dict["entities"]["user_mentions"]]
+        except KeyError: return []
+
+    # Media
+    @property
+    def media(self) -> list[Media]:
+        try: return [Media(image, parent_tweet_id=self.id) for image in
+                     self._dict["entities"]["media"]]
+        except KeyError: return []
 
     @property
     def text_entities(self) -> list[Entity]:
+        # noinspection PyTypeChecker
         return sorted(
             self.shortened_urls
             + self.user_mentions,
