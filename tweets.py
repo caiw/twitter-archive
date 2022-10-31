@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from xml.dom.minidom import Document, parseString
 
 from dateutil.parser import parse as dt_parse
 from bs4 import BeautifulSoup
@@ -52,11 +53,10 @@ class Tweet:
             self.media = []
 
     @property
-    def entities(self) -> list[Entity]:
+    def text_entities(self) -> list[Entity]:
         return sorted(
             self.shortened_urls
-            + self.user_mentions
-            + self.media,
+            + self.user_mentions,
             key=lambda e: e.indices[0]
         )
 
@@ -81,9 +81,15 @@ class Tweet:
     @property
     def full_text_repaired(self) -> str:
         s = self.full_text_unrepaired
-        # Replace entities in reverse order
-        for entity in reversed(self.entities):
+        # Replace text_entities in reverse order
+        for entity in reversed(self.text_entities):
             s = entity.replace_in_string(s)
+        return s
+
+    def full_text_repaired_as_html(self, doc: Document):
+        s = self.full_text_unrepaired
+        for entity in reversed(self.text_entities):
+            s = entity.replace_in_string_as_html(s, doc)
         return s
 
     def __hash__(self):
@@ -102,6 +108,14 @@ class Tweet:
             s += f", in reply to {self.reply_to_username}: {self.reply_to_tweet_id}"
         s += ")"
         return s
+
+    def to_div(self, doc: Document):
+        div = doc.createElement("div")
+        p = parseString("<p>"+self.full_text_repaired_as_html(doc)+"</p>").documentElement
+        div.appendChild(p)
+        for m in self.media:
+            div.appendChild(m.as_tag(doc))
+        return div
 
     @classmethod
     def _parse_time(cls, time_str: str) -> datetime:

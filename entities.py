@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
+from xml.dom.minidom import Document, Element
 
 
 class Entity(ABC):
@@ -12,6 +13,17 @@ class Entity(ABC):
     def replace_in_string(self, s: str) -> str:
         pass
 
+    def replace_in_string_as_html(self, s: str, doc: Document):
+
+        new_s = s[:self.indices[0]]
+        new_s += self.as_tag(doc).toxml()
+        new_s += s[self.indices[1]:]
+        return new_s
+
+    @abstractmethod
+    def as_tag(self, doc: Document):
+        pass
+
 
 class ShortenedURL(Entity):
     def __init__(self, d: dict):
@@ -19,6 +31,12 @@ class ShortenedURL(Entity):
         self.url: str = d["expanded_url"]
         self.shortened_url: str = d["url"]
         self.display_url: str = d["display_url"]
+
+    def as_tag(self, doc: Document) -> Element:
+        a = doc.createElement("a")
+        a.appendChild(doc.createTextNode(self.display_url))
+        a.setAttribute("href", self.url)
+        return a
 
     def replace_in_string(self, s: str) -> str:
         new_s = s[:self.indices[0]]
@@ -33,6 +51,13 @@ class UserMention(Entity):
         self.username: str = d["screen_name"]
         self.userid: int = int(d["id"])
         self.display_name: str = d["name"]
+
+    def as_tag(self, doc: Document):
+        a = doc.createElement("a")
+        a.appendChild(doc.createTextNode(f"@{self.username}"))
+        a.setAttribute("href", "https://twitter.com/" + self.username)
+        a.setAttribute("class", "at_handle")
+        return a
 
     def replace_in_string(self, s: str) -> str:
         new_s = s[:self.indices[0]]
@@ -55,11 +80,16 @@ class Media(ShortenedURL):
         extension = self.url_original[-3:]
         return f"tweets_media/{self.parent_tweet_id}-{self.name}.{extension}"
 
+    def as_tag(self, doc: Document):
+        img = doc.createElement("img")
+        img.setAttribute("src", self.url_localised)
+        return img
+
     def replace_in_string(self, s: str) -> str:
-        new_s = s[:self.indices[0]]
-        new_s += self.url_localised
-        new_s += s[self.indices[1]:]
-        return new_s
+        return ""
+
+    def replace_in_string_as_html(self, s: str, doc: Document):
+        return ""
 
     @classmethod
     def _get_name(cls, from_url: str) -> str:

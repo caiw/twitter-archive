@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from xml.dom.minidom import getDOMImplementation, Document
 
 from tweets import Tweet
 
@@ -17,3 +18,30 @@ def save_tweets_as_text(tweets: list[Tweet], to_path: Path) -> None:
     s = "\n\n".join(t.to_str() for t in tweets) + "\n"
     with to_path.open("w") as out_file:
         out_file.write(s)
+
+
+def _getDOM() -> Document:
+    impl = getDOMImplementation()
+    dt = impl.createDocumentType(
+        "html",
+        "-//W3C//DTD XHTML 1.0 Strict//EN",
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd",
+    )
+    return impl.createDocument("http://www.w3.org/1999/xhtml", "html", dt)
+
+
+def save_tweets_as_html(tweets: list[Tweet], to_path: Path) -> None:
+    doc: Document = _getDOM()
+
+    lst = doc.createElement("ul")
+    for tweet in tweets:
+        li = doc.createElement("li")
+        li.appendChild(tweet.to_div(doc))
+        lst.appendChild(li)
+    tweets_div = doc.createElement("div")
+    tweets_div.appendChild(lst)
+
+    html = doc.documentElement
+    html.appendChild(tweets_div)
+    with to_path.open("w") as out_file:
+        out_file.write(doc.toxml())

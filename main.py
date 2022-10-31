@@ -2,7 +2,8 @@ import sys
 from pathlib import Path
 
 from tweets import Tweet
-from save_load import load_tweets_from_twitterjs, save_tweets_as_text
+from save_load import load_tweets_from_twitterjs, save_tweets_as_text, \
+    save_tweets_as_html
 
 
 def is_self_reply(t: Tweet) -> bool:
@@ -22,8 +23,9 @@ def main(dirs: list[str]):
             if not t.is_retweet
             and not t.is_quotetweet
             and not t.is_reply)
-    save_tweets_as_text(sorted(tweets, key=lambda t: t.timestamp, reverse=True),
-                        to_path=Path(output_dir, "test.txt"))
+    sorted_tweets: list[Tweet] = sorted(tweets, key=lambda t: t.timestamp, reverse=True)
+    save_tweets_as_text(sorted_tweets, to_path=Path(output_dir, "test.txt"))
+    save_tweets_as_html(sorted_tweets, to_path=Path(output_dir, "test.html"))
 
 
 if __name__ == "__main__":
