@@ -1,2 +1,7 @@
 .idea
 __pycache__
+
+out/*.html
+out/*.txt
+out/tweets/*.html
+out/media/*.jpg

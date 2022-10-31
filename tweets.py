@@ -7,6 +7,7 @@ from dateutil.parser import parse as dt_parse
 from bs4 import BeautifulSoup
 
 from entities import ShortenedURL, UserMention, Entity, Media
+from paths import tweet_dir_name
 
 
 class Tweet:
@@ -138,7 +139,7 @@ class Tweet:
         tweet.setAttribute("class", "tweet")
         tweet.setAttribute("id", f"tweet{self.id}")
         # Reply
-        if self.is_at_message and not self.reply_to_username == "caiwingfield":
+        if self.is_at_message:
             reply_note = doc.createElement("div")
             reply_note.setAttribute("class", "reply-note")
             if self.is_reply:
@@ -161,7 +162,7 @@ class Tweet:
         # Date
         date = doc.createElement("div")
         date.setAttribute("class", "timestamp")
-        date.appendChild(doc.createTextNode(str(self.timestamp)))
+        date.appendChild(parseString(f'<a href="{tweet_dir_name}/{self.id}.html">{str(self.timestamp)}</a>').documentElement)
         tweet.appendChild(date)
         return tweet
 

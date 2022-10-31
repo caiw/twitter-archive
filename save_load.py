@@ -20,7 +20,7 @@ def save_tweets_as_text(tweets: list[Tweet], to_path: Path) -> None:
         out_file.write(s)
 
 
-def _getDOM() -> Document:
+def _get_dom() -> Document:
     impl = getDOMImplementation()
     dt = impl.createDocumentType(
         "html",
@@ -30,8 +30,8 @@ def _getDOM() -> Document:
     return impl.createDocument("http://www.w3.org/1999/xhtml", "html", dt)
 
 
-def save_tweets_as_html(tweets: list[Tweet], to_path: Path) -> None:
-    doc: Document = _getDOM()
+def save_tweets_as_html_list(tweets: list[Tweet], to_path: Path) -> None:
+    doc: Document = _get_dom()
 
     lst = doc.createElement("ul")
     for tweet in tweets:
@@ -45,3 +45,15 @@ def save_tweets_as_html(tweets: list[Tweet], to_path: Path) -> None:
     html.appendChild(tweets_div)
     with to_path.open("w") as out_file:
         out_file.write(doc.toxml())
+
+
+def save_tweets_as_html_individual(tweets: list[Tweet], to_path: Path) -> None:
+    to_path.mkdir(parents=False, exist_ok=True)
+
+    doc: Document
+    for tweet in tweets:
+        doc = _get_dom()
+        html = doc.documentElement
+        html.appendChild(tweet.to_div(doc))
+        with Path(to_path, f"{tweet.id}.html").open("w") as out_file:
+            out_file.write(doc.toxml())

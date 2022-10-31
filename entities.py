@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from xml.dom.minidom import Document, Element
 
+from paths import media_dir_name
+
 
 class Entity(ABC):
     def __init__(self, d: dict):
@@ -78,7 +80,7 @@ class Media(ShortenedURL):
     @property
     def url_localised(self) -> str:
         extension = self.url_original[-3:]
-        return f"tweets_media/{self.parent_tweet_id}-{self.name}.{extension}"
+        return f"{media_dir_name}/{self.parent_tweet_id}-{self.name}.{extension}"
 
     def as_tag(self, doc: Document):
         img = doc.createElement("img")
