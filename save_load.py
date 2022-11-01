@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from xml.dom.minidom import getDOMImplementation, Document
+from xml.dom.minidom import getDOMImplementation, Document, Element
 
 from tweets import Tweet
 
@@ -41,8 +41,8 @@ def save_tweets_as_html_list(tweets: list[Tweet], to_path: Path) -> None:
     tweets_div = doc.createElement("div")
     tweets_div.appendChild(lst)
 
-    html = doc.documentElement
-    html.appendChild(tweets_div)
+    body = _get_body(doc, title="Tweets")
+    body.appendChild(tweets_div)
     with to_path.open("w") as out_file:
         out_file.write(doc.toxml())
 
@@ -53,7 +53,26 @@ def save_tweets_as_html_individual(tweets: list[Tweet], to_path: Path) -> None:
     doc: Document
     for tweet in tweets:
         doc = _get_dom()
-        html = doc.documentElement
-        html.appendChild(tweet.to_div(doc))
+        body = _get_body(doc, title="Tweet")
+        body.appendChild(tweet.to_div(doc))
         with Path(to_path, f"{tweet.id}.html").open("w") as out_file:
             out_file.write(doc.toxml())
+
+
+def _get_body(doc: Document, title: str) -> Element:
+        html = doc.documentElement
+        head = doc.createElement("head")
+        # Title
+        title_element: Element = doc.createElement("title")
+        title_element.appendChild(doc.createTextNode(title))
+        head.appendChild(title_element)
+        # Stylesheet
+        link = doc.createElement("link")
+        link.setAttribute("rel", "stylesheet")
+        link.setAttribute("href", "tweet.css")
+        head.appendChild(link)
+        html.appendChild(head)
+        # Body
+        body = doc.createElement("body")
+        html.appendChild(body)
+        return body
