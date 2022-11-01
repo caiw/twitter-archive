@@ -2,21 +2,39 @@ import json
 from pathlib import Path
 from xml.dom.minidom import getDOMImplementation, Document, Element
 
+from entities import User
+from paths import tweet_data_filename, account_data_filename, tweet_dir_name, \
+    saved_text_file_name, saved_html_file_name
 from tweets import Tweet
 
 
-def load_tweets_from_twitterjs(tw_js_path: Path) -> list[Tweet]:
+def _json_from_js_file(js_file) -> list[dict]:
+    js_lines: list[str] = js_file.readlines()
+    js_lines = ["[\n"] + js_lines[1:]  # Convert js var assignment to opening list
+    return json.loads("\n".join(js_lines))
+
+
+def load_tweets_from_data_dir(data_dir: Path) -> list[Tweet]:
     """Load a list of tweets from a twitter.js file."""
-    with tw_js_path.open("r") as tw_js_file:
-        tweets_txt: list[str] = tw_js_file.readlines()
-        tweets_txt = ["[\n"] + tweets_txt[1:]  # Convert js to json
-        tweets_js: list[dict] = json.loads("\n".join(tweets_txt))
-        return [Tweet(d) for d in tweets_js]
+    with Path(data_dir, tweet_data_filename).open("r") as tw_js_file:
+        tweets: list[dict] = _json_from_js_file(tw_js_file)
+    return [Tweet(d) for d in tweets]
 
 
-def save_tweets_as_text(tweets: list[Tweet], to_path: Path) -> None:
+def load_user(data_dir: Path) -> User:
+    with Path(data_dir, account_data_filename).open("r") as account_js_file:
+        user_dict: dict = _json_from_js_file(account_js_file)[0]['account']
+    return User(
+        id=int(user_dict['accountId']),
+        name=user_dict['username'],
+    )
+
+
+def save_tweets_as_text(tweets: list[Tweet], user: User, to_dir: Path) -> None:
     s = "\n\n".join(t.to_str() for t in tweets) + "\n"
-    with to_path.open("w") as out_file:
+    save_dir = Path(to_dir, user.name)
+    save_dir.mkdir(parents=False, exist_ok=True)
+    with Path(save_dir, saved_text_file_name).open("w") as out_file:
         out_file.write(s)
 
 
@@ -30,7 +48,10 @@ def _get_dom() -> Document:
     return impl.createDocument("http://www.w3.org/1999/xhtml", "html", dt)
 
 
-def save_tweets_as_html_list(tweets: list[Tweet], to_path: Path) -> None:
+def save_tweets_as_html_list(tweets: list[Tweet], user: User, to_dir: Path) -> None:
+    if len(tweets) == 0:
+        return
+
     doc: Document = _get_dom()
 
     lst = doc.createElement("ul")
@@ -43,19 +64,23 @@ def save_tweets_as_html_list(tweets: list[Tweet], to_path: Path) -> None:
 
     body = _get_body(doc, title="Tweets")
     body.appendChild(tweets_div)
-    with to_path.open("w") as out_file:
+    save_dir = Path(to_dir, user.name)
+    with Path(save_dir, saved_html_file_name).open("w") as out_file:
         out_file.write(doc.toxml())
 
 
-def save_tweets_as_html_individual(tweets: list[Tweet], to_path: Path) -> None:
-    to_path.mkdir(parents=False, exist_ok=True)
+def save_tweets_as_html_individual(tweets: list[Tweet], user: User, to_dir: Path) -> None:
+    to_dir.mkdir(parents=False, exist_ok=True)
+
+    save_dir = Path(to_dir, user.name, tweet_dir_name)
+    save_dir.mkdir(parents=False, exist_ok=True)
 
     doc: Document
     for tweet in tweets:
         doc = _get_dom()
         body = _get_body(doc, title="Tweet")
         body.appendChild(tweet.to_div(doc))
-        with Path(to_path, f"{tweet.id}.html").open("w") as out_file:
+        with Path(save_dir, f"{tweet.id}.html").open("w") as out_file:
             out_file.write(doc.toxml())
 
 

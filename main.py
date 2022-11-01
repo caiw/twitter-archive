@@ -1,20 +1,31 @@
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 
-from paths import tweet_dir_name
+from entities import User
+from paths import out_dir
+from save_load import load_tweets_from_data_dir, save_tweets_as_text, \
+    save_tweets_as_html_list, save_tweets_as_html_individual, load_user
 from tweets import Tweet
-from save_load import load_tweets_from_twitterjs, save_tweets_as_text, \
-    save_tweets_as_html_list, save_tweets_as_html_individual
 
 
 def main(dirs: list[str]):
-    output_dir: Path = Path(Path(__file__).parent, "out")
+    if len(dirs) == 0:
+        print("No paths supplied")
+        return
+
     data_paths = [Path(d, "data") for d in dirs]
     tweets: set[Tweet] = set()
     # Collate tweets
+    user: User | None = None
     for data_path in data_paths:
-        tw_js_path = Path(data_path, "tweets.js")
-        new_tweets: list[Tweet] = load_tweets_from_twitterjs(tw_js_path)
+        this_user: User = load_user(data_path)
+        if user is None:
+            user = this_user
+        elif user.id != this_user.id:
+            raise ValueError("Can't mix users")
+        new_tweets: list[Tweet] = load_tweets_from_data_dir(data_path)
         tweets.update(new_tweets)
     sorted_tweets: list[Tweet] = sorted(tweets, key=lambda t: t.timestamp, reverse=True)
     filtered_tweets: list[Tweet] = [
@@ -23,9 +34,9 @@ def main(dirs: list[str]):
         and not t.is_quotetweet
         and not t.is_at_message
     ]
-    save_tweets_as_text(filtered_tweets, to_path=Path(output_dir, "tweets.txt"))
-    save_tweets_as_html_list(filtered_tweets, to_path=Path(output_dir, "tweets.html"))
-    save_tweets_as_html_individual(sorted_tweets, to_path=Path(output_dir, tweet_dir_name))
+    save_tweets_as_text(filtered_tweets, user=user, to_dir=out_dir)
+    save_tweets_as_html_list(filtered_tweets, user=user, to_dir=out_dir)
+    save_tweets_as_html_individual(sorted_tweets, user=user, to_dir=out_dir)
 
 
 if __name__ == "__main__":

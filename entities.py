@@ -1,8 +1,18 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from pathlib import Path
 from xml.dom.minidom import Document, Element
 
 from paths import media_dir_name
+
+
+@dataclass
+class User:
+    id: int
+    name: str
+    # display_name: str | None
 
 
 class Entity(ABC):
