@@ -84,7 +84,10 @@ def save_tweets_as_html_individual(tweets: list[Tweet], user: User, to_dir: Path
     for tweet in tweets:
         doc = _get_dom()
         body = _get_body(doc, title="Tweet", relative_depth=relative_depth)
-        body.appendChild(tweet.to_div(doc, relative_depth=relative_depth))
+        tweet_container = doc.createElement("div")
+        tweet_container.setAttribute("class", "tweet-individual-container")
+        tweet_container.appendChild(tweet.to_div(doc, relative_depth=relative_depth))
+        body.appendChild(tweet_container)
         with Path(save_dir, f"{tweet.id}.html").open("wb") as out_file:
             out_file.write(doc.toprettyxml(encoding="utf-8"))
 

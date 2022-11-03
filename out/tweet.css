@@ -5,13 +5,16 @@ body
 }
 
 /* border */
-.tweets, .tweet
+.tweets,
+.tweet,
+.tweet-individual-container
 {
-	border-width: 1px;
-	border-color: rgba(0,0,0,0.25);
+	border-width: .1pt;
+	border-color: rgba(0,0,0,0.2);
 }
 
-.tweets
+.tweets,
+.tweet-individual-container
 {
     min-width: 256px;
     max-width: 512px;
@@ -22,29 +25,36 @@ body
 	border-bottom-style: solid;
 }
 
+.tweet-individual-container
+{
+	margin-top: 32px;
+}
+
 .tweet
 {
     background-color: aliceblue;
-    padding: 10px;
+    padding: 5px 10px 10px;
 	border-top-style: solid;
 }
 
 .tweet p
 {
-	margin-top: 0;
+	margin: 5px 0 0;
 }
 
 .tweet .media-container
 {
 	text-align: center;
+	margin: 10px 0 0;
 }
 
-.tweet img
+.tweet img.thumb
 {
     max-height: 500px;
     max-width: 500px;
     height: auto;
     width: auto;
+	border-style: outset;
 }
 
 .timestamp
