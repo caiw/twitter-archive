@@ -1,16 +1,34 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from datetime import datetime
 from xml.dom.minidom import Document, parseString
 
 from dateutil.parser import parse as dt_parse
 from bs4 import BeautifulSoup
+from pytz import timezone
 
 from entities import ShortenedURL, UserMention, Entity, Media
 from paths import tweet_dir_name
 
 
+def format_datetime(dt: datetime) -> str:
+    ordinal = defaultdict(lambda: 'th', {'1': 'st', '2': 'nd', '3': 'rd'})
+
+    day_name = f"{dt:%A}"       # Thursday
+    day = f"{dt:%-d}"           # 3
+    th = ordinal[day[-1]]       # rd
+    month = f"{dt:%B}"          # November
+    year = f"{dt:%Y}"           # 2022
+    hour = f"{dt:%-I}"          # 9
+    minute = f"{dt:%M}"         # 29
+    am_pm = f"{dt:%p}".lower()  # am
+
+    return f"{day_name} {day}{th} {month} {year}, at {hour}:{minute} {am_pm}"
+
+
 class Tweet:
+
     def __init__(self, d: dict):
         self._dict: dict = d["tweet"]
 
@@ -18,7 +36,9 @@ class Tweet:
     def id(self) -> int: return int(self._dict['id'])
 
     @property
-    def timestamp(self) -> datetime: return self._parse_time(self._dict['created_at'])
+    def timestamp(self) -> datetime:
+        time = self._parse_time(self._dict['created_at'])
+        return time.astimezone(timezone("Europe/London"))
 
     @property
     def source(self) -> str: return self._parse_source(self._dict['source'])
@@ -129,7 +149,7 @@ class Tweet:
         s += self.full_text_repaired
         # Add metadata
         s += "\n("
-        s += f"{self.timestamp}"
+        s += format_datetime(self.timestamp)
         if self.is_reply:
             s += f", in reply to {self.reply_to_username}: {self.reply_to_tweet_id}"
         s += ")"
@@ -163,7 +183,8 @@ class Tweet:
         # Date
         date = doc.createElement("div")
         date.setAttribute("class", "timestamp")
-        date.appendChild(parseString(f'<a href="{tweet_dir_name}/{self.id}.html">{str(self.timestamp)}</a>').documentElement)
+        time = format_datetime(self.timestamp)
+        date.appendChild(parseString(f'<a href="{tweet_dir_name}/{self.id}.html">{time}</a>').documentElement)
         tweet.appendChild(date)
         return tweet
 
