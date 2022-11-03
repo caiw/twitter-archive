@@ -10,3 +10,5 @@ out/*/status/*.html
 
 out/*/media/*.jpg
 out/*/media/*.png
+
+out/*/media_thumbs/*

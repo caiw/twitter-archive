@@ -4,6 +4,7 @@ out_dir: Path = Path(Path(__file__).parent, "out")
 
 tweet_dir_name: str = "status"
 media_dir_name: str = "media"
+thumbs_dir_name: str = "media_thumbs"
 
 saved_text_file_name: str = "tweets.txt"
 saved_html_file_name: str = "tweets.html"

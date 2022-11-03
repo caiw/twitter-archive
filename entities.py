@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from xml.dom.minidom import Document, Element
 
-from paths import media_dir_name
+from paths import media_dir_name, thumbs_dir_name
 
 
 @dataclass
@@ -92,12 +92,20 @@ class Media(ShortenedURL):
         extension = self.url_original[-3:]
         return f"{media_dir_name}/{self.parent_tweet_id}-{self.name}.{extension}"
 
+    @property
+    def thumb_url_localised(self) -> str:
+        extension = self.url_original[-3:]
+        return f"{thumbs_dir_name}/{self.parent_tweet_id}-{self.name}-thumb.{extension}"
+
     def as_tag(self, doc: Document, relative_depth: int = 1):
         url = self.url_localised
+        url_thumb = self.thumb_url_localised
         for _ in range(relative_depth - 1):
             url = "../" + url
+            url_thumb = "../" + url_thumb
         img = doc.createElement("img")
-        img.setAttribute("src", url)
+        img.setAttribute("src", url_thumb)
+        img.setAttribute("class", "thumb")
         a = doc.createElement("a")
         a.setAttribute("href", url)
         a.appendChild(img)

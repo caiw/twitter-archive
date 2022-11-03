@@ -28,7 +28,7 @@ def main(dirs: list[str]):
             raise ValueError("Can't mix users")
         new_tweets: list[Tweet] = load_tweets_from_data_dir(data_path)
         tweets.update(new_tweets)
-        copy_media(new_tweets, user=user, from_dir=data_path, to_dir=out_dir)
+        copy_media(new_tweets, user=user, from_dir=data_path, to_dir=out_dir, thumb_size_px=256)
     sorted_tweets: list[Tweet] = sorted(tweets, key=lambda t: t.timestamp, reverse=True)
     filtered_tweets: list[Tweet] = [
         t for t in sorted_tweets
