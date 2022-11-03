@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from shutil import copy
 from xml.dom.minidom import getDOMImplementation, Document, Element
 
 from entities import User
@@ -101,3 +102,15 @@ def _get_body(doc: Document, title: str) -> Element:
         body = doc.createElement("body")
         html.appendChild(body)
         return body
+
+
+def copy_media(tweets: list[Tweet], user: User, from_dir: Path, to_dir: Path) -> None:
+    for tweet in tweets:
+        if tweet.is_retweet:
+            continue
+        for media in tweet.media:
+            archive_media = Path(from_dir, "tweets_media", f"{media.parent_tweet_id}-{media.name}{media.extension}")
+            target_media_dir = Path(to_dir, user.name, "media")
+            target_media_dir.mkdir(parents=False, exist_ok=True)
+            if not Path(target_media_dir, archive_media.name).exists():
+                copy(archive_media, target_media_dir)

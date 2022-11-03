@@ -95,7 +95,10 @@ class Media(ShortenedURL):
     def as_tag(self, doc: Document):
         img = doc.createElement("img")
         img.setAttribute("src", self.url_localised)
-        return img
+        a = doc.createElement("a")
+        a.setAttribute("href", self.url_localised)
+        a.appendChild(img)
+        return a
 
     def replace_in_string(self, s: str) -> str:
         return ""

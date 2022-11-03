@@ -6,7 +6,8 @@ from pathlib import Path
 from entities import User
 from paths import out_dir
 from save_load import load_tweets_from_data_dir, save_tweets_as_text, \
-    save_tweets_as_html_list, save_tweets_as_html_individual, load_user
+    save_tweets_as_html_list, save_tweets_as_html_individual, load_user, \
+    copy_media
 from tweets import Tweet
 
 
@@ -27,6 +28,7 @@ def main(dirs: list[str]):
             raise ValueError("Can't mix users")
         new_tweets: list[Tweet] = load_tweets_from_data_dir(data_path)
         tweets.update(new_tweets)
+        copy_media(new_tweets, user=user, from_dir=data_path, to_dir=out_dir)
     sorted_tweets: list[Tweet] = sorted(tweets, key=lambda t: t.timestamp, reverse=True)
     filtered_tweets: list[Tweet] = [
         t for t in sorted_tweets

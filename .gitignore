@@ -1,7 +1,12 @@
 .idea
 __pycache__
 
+in/*
+
 out/*/*.html
 out/*/*.txt
+
 out/*/status/*.html
+
 out/*/media/*.jpg
+out/*/media/*.png
