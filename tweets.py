@@ -69,7 +69,7 @@ class Tweet:
     @property
     def media(self) -> list[Media]:
         try: return [Media(image, parent_tweet_id=self.id) for image in
-                     self._dict["entities"]["media"]]
+                     self._dict["extended_entities"]["media"]]
         except KeyError: return []
 
     @property
