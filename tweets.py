@@ -77,7 +77,8 @@ class Tweet:
         # noinspection PyTypeChecker
         return sorted(
             self.shortened_urls
-            + self.user_mentions,
+            + self.user_mentions
+            + self.media,
             key=lambda e: e.indices[0]
         )
 

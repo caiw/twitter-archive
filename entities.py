@@ -104,10 +104,11 @@ class Media(ShortenedURL):
         return a
 
     def replace_in_string(self, s: str) -> str:
-        return ""
+        # Cut it out
+        return s[:self.indices[0]] +  s[self.indices[1]:]
 
     def replace_in_string_as_html(self, s: str, doc: Document):
-        return ""
+        return self.replace_in_string(s)
 
     @classmethod
     def _get_name(cls, from_url: str) -> str:
