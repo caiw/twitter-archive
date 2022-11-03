@@ -101,7 +101,10 @@ class Media(ShortenedURL):
         a = doc.createElement("a")
         a.setAttribute("href", url)
         a.appendChild(img)
-        return a
+        container = doc.createElement("div")
+        container.setAttribute("class", "media-container")
+        container.appendChild(a)
+        return container
 
     def replace_in_string(self, s: str) -> str:
         # Cut it out

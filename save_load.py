@@ -57,6 +57,7 @@ def save_tweets_as_html_list(tweets: list[Tweet], user: User, to_dir: Path) -> N
     doc: Document = _get_dom()
 
     tweets_list_div = doc.createElement("div")
+    tweets_list_div.setAttribute("class", "tweets")
     for tweet in tweets:
         t_div = doc.createElement("div")
         t_div.appendChild(tweet.to_div(doc, relative_depth=relative_depth))

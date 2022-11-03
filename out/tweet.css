@@ -1,12 +1,65 @@
+body
+{
+	margin: 0;
+	padding: 0;
+}
+
+/* border */
+.tweets, .tweet
+{
+	border-width: 1px;
+	border-color: rgba(0,0,0,0.25);
+}
+
+.tweets
+{
+    min-width: 256px;
+    max-width: 512px;
+    margin-left: auto;
+    margin-right: auto;
+	border-right-style: solid;
+	border-left-style: solid;
+	border-bottom-style: solid;
+}
+
 .tweet
 {
     background-color: aliceblue;
+    padding: 10px;
+	border-top-style: solid;
 }
 
-img
+.tweet p
+{
+	margin-top: 0;
+}
+
+.tweet .media-container
+{
+	text-align: center;
+}
+
+.tweet img
 {
     max-height: 500px;
     max-width: 500px;
     height: auto;
     width: auto;
+}
+
+.timestamp
+{
+	text-align: right;
+	font-size: 62%;
+}
+
+.timestamp a
+{
+	text-decoration: none;
+	color: #000;
+}
+
+.timestamp a:hover
+{
+	text-decoration: underline;
 }
