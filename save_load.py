@@ -55,16 +55,14 @@ def save_tweets_as_html_list(tweets: list[Tweet], user: User, to_dir: Path) -> N
 
     doc: Document = _get_dom()
 
-    lst = doc.createElement("ul")
+    tweets_list_div = doc.createElement("div")
     for tweet in tweets:
-        li = doc.createElement("li")
-        li.appendChild(tweet.to_div(doc))
-        lst.appendChild(li)
-    tweets_div = doc.createElement("div")
-    tweets_div.appendChild(lst)
+        t_div = doc.createElement("div")
+        t_div.appendChild(tweet.to_div(doc))
+        tweets_list_div.appendChild(t_div)
 
-    body = _get_body(doc, title="Tweets")
-    body.appendChild(tweets_div)
+    body = _get_body(doc, title="Tweets", relative_depth_from_stylesheet=1)
+    body.appendChild(tweets_list_div)
     save_dir = Path(to_dir, user.name)
     with Path(save_dir, saved_html_file_name).open("w") as out_file:
         out_file.write(doc.toxml())
@@ -79,13 +77,13 @@ def save_tweets_as_html_individual(tweets: list[Tweet], user: User, to_dir: Path
     doc: Document
     for tweet in tweets:
         doc = _get_dom()
-        body = _get_body(doc, title="Tweet")
+        body = _get_body(doc, title="Tweet", relative_depth_from_stylesheet=2)
         body.appendChild(tweet.to_div(doc))
         with Path(save_dir, f"{tweet.id}.html").open("w") as out_file:
             out_file.write(doc.toxml())
 
 
-def _get_body(doc: Document, title: str) -> Element:
+def _get_body(doc: Document, title: str, relative_depth_from_stylesheet: int) -> Element:
         html = doc.documentElement
         head = doc.createElement("head")
         # Title
@@ -95,7 +93,10 @@ def _get_body(doc: Document, title: str) -> Element:
         # Stylesheet
         link = doc.createElement("link")
         link.setAttribute("rel", "stylesheet")
-        link.setAttribute("href", "tweet.css")
+        relative_path_to_stylesheet = "tweet.css"
+        for _ in range(relative_depth_from_stylesheet):
+            relative_path_to_stylesheet = "../" + relative_path_to_stylesheet
+        link.setAttribute("href", relative_path_to_stylesheet)
         head.appendChild(link)
         html.appendChild(head)
         # Body
