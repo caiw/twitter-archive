@@ -134,7 +134,7 @@ class Tweet:
         s += ")"
         return s
 
-    def to_div(self, doc: Document):
+    def to_div(self, doc: Document, relative_depth):
         tweet = doc.createElement("div")
         tweet.setAttribute("class", "tweet")
         tweet.setAttribute("id", f"tweet{self.id}")
@@ -158,7 +158,7 @@ class Tweet:
         tweet.appendChild(p)
         # Images
         for m in self.media:
-            tweet.appendChild(m.as_tag(doc))
+            tweet.appendChild(m.as_tag(doc, relative_depth))
         # Date
         date = doc.createElement("div")
         date.setAttribute("class", "timestamp")

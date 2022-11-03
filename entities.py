@@ -92,11 +92,14 @@ class Media(ShortenedURL):
         extension = self.url_original[-3:]
         return f"{media_dir_name}/{self.parent_tweet_id}-{self.name}.{extension}"
 
-    def as_tag(self, doc: Document):
+    def as_tag(self, doc: Document, relative_depth: int = 1):
+        url = self.url_localised
+        for _ in range(relative_depth - 1):
+            url = "../" + url
         img = doc.createElement("img")
-        img.setAttribute("src", self.url_localised)
+        img.setAttribute("src", url)
         a = doc.createElement("a")
-        a.setAttribute("href", self.url_localised)
+        a.setAttribute("href", url)
         a.appendChild(img)
         return a
 

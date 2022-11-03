@@ -50,6 +50,7 @@ def _get_dom() -> Document:
 
 
 def save_tweets_as_html_list(tweets: list[Tweet], user: User, to_dir: Path) -> None:
+    relative_depth = 1  # media folder is sibling
     if len(tweets) == 0:
         return
 
@@ -58,10 +59,10 @@ def save_tweets_as_html_list(tweets: list[Tweet], user: User, to_dir: Path) -> N
     tweets_list_div = doc.createElement("div")
     for tweet in tweets:
         t_div = doc.createElement("div")
-        t_div.appendChild(tweet.to_div(doc))
+        t_div.appendChild(tweet.to_div(doc, relative_depth=relative_depth))
         tweets_list_div.appendChild(t_div)
 
-    body = _get_body(doc, title="Tweets", relative_depth_from_stylesheet=1)
+    body = _get_body(doc, title="Tweets", relative_depth=relative_depth)
     body.appendChild(tweets_list_div)
     save_dir = Path(to_dir, user.name)
     with Path(save_dir, saved_html_file_name).open("w") as out_file:
@@ -69,6 +70,8 @@ def save_tweets_as_html_list(tweets: list[Tweet], user: User, to_dir: Path) -> N
 
 
 def save_tweets_as_html_individual(tweets: list[Tweet], user: User, to_dir: Path) -> None:
+    relative_depth = 2  # media dir is above status dir
+
     to_dir.mkdir(parents=False, exist_ok=True)
 
     save_dir = Path(to_dir, user.name, tweet_dir_name)
@@ -77,32 +80,32 @@ def save_tweets_as_html_individual(tweets: list[Tweet], user: User, to_dir: Path
     doc: Document
     for tweet in tweets:
         doc = _get_dom()
-        body = _get_body(doc, title="Tweet", relative_depth_from_stylesheet=2)
-        body.appendChild(tweet.to_div(doc))
+        body = _get_body(doc, title="Tweet", relative_depth=relative_depth)
+        body.appendChild(tweet.to_div(doc, relative_depth=relative_depth))
         with Path(save_dir, f"{tweet.id}.html").open("w") as out_file:
             out_file.write(doc.toxml())
 
 
-def _get_body(doc: Document, title: str, relative_depth_from_stylesheet: int) -> Element:
-        html = doc.documentElement
-        head = doc.createElement("head")
-        # Title
-        title_element: Element = doc.createElement("title")
-        title_element.appendChild(doc.createTextNode(title))
-        head.appendChild(title_element)
-        # Stylesheet
-        link = doc.createElement("link")
-        link.setAttribute("rel", "stylesheet")
-        relative_path_to_stylesheet = "tweet.css"
-        for _ in range(relative_depth_from_stylesheet):
-            relative_path_to_stylesheet = "../" + relative_path_to_stylesheet
-        link.setAttribute("href", relative_path_to_stylesheet)
-        head.appendChild(link)
-        html.appendChild(head)
-        # Body
-        body = doc.createElement("body")
-        html.appendChild(body)
-        return body
+def _get_body(doc: Document, title: str, relative_depth: int) -> Element:
+    html = doc.documentElement
+    head = doc.createElement("head")
+    # Title
+    title_element: Element = doc.createElement("title")
+    title_element.appendChild(doc.createTextNode(title))
+    head.appendChild(title_element)
+    # Stylesheet
+    link = doc.createElement("link")
+    link.setAttribute("rel", "stylesheet")
+    relative_path_to_stylesheet = "tweet.css"
+    for _ in range(relative_depth):
+        relative_path_to_stylesheet = "../" + relative_path_to_stylesheet
+    link.setAttribute("href", relative_path_to_stylesheet)
+    head.appendChild(link)
+    html.appendChild(head)
+    # Body
+    body = doc.createElement("body")
+    html.appendChild(body)
+    return body
 
 
 def copy_media(tweets: list[Tweet], user: User, from_dir: Path, to_dir: Path) -> None:
