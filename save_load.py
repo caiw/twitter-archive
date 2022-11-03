@@ -68,8 +68,8 @@ def save_tweets_as_html_list(tweets: list[Tweet], user: User, to_dir: Path) -> N
     body = _get_body(doc, title="Tweets", relative_depth=relative_depth)
     body.appendChild(tweets_list_div)
     save_dir = Path(to_dir, user.name)
-    with Path(save_dir, saved_html_file_name).open("w") as out_file:
-        out_file.write(doc.toxml())
+    with Path(save_dir, saved_html_file_name).open("wb") as out_file:
+        out_file.write(doc.toprettyxml(encoding="utf-8"))
 
 
 def save_tweets_as_html_individual(tweets: list[Tweet], user: User, to_dir: Path) -> None:
@@ -85,8 +85,8 @@ def save_tweets_as_html_individual(tweets: list[Tweet], user: User, to_dir: Path
         doc = _get_dom()
         body = _get_body(doc, title="Tweet", relative_depth=relative_depth)
         body.appendChild(tweet.to_div(doc, relative_depth=relative_depth))
-        with Path(save_dir, f"{tweet.id}.html").open("w") as out_file:
-            out_file.write(doc.toxml())
+        with Path(save_dir, f"{tweet.id}.html").open("wb") as out_file:
+            out_file.write(doc.toprettyxml(encoding="utf-8"))
 
 
 def _get_body(doc: Document, title: str, relative_depth: int) -> Element:
