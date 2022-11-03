@@ -12,21 +12,6 @@ from entities import ShortenedURL, UserMention, Entity, Media
 from paths import tweet_dir_name
 
 
-def format_datetime(dt: datetime) -> str:
-    ordinal = defaultdict(lambda: 'th', {'1': 'st', '2': 'nd', '3': 'rd'})
-
-    day_name = f"{dt:%A}"       # Thursday
-    day = f"{dt:%-d}"           # 3
-    th = ordinal[day[-1]]       # rd
-    month = f"{dt:%B}"          # November
-    year = f"{dt:%Y}"           # 2022
-    hour = f"{dt:%-I}"          # 9
-    minute = f"{dt:%M}"         # 29
-    am_pm = f"{dt:%p}".lower()  # am
-
-    return f"{day_name} {day}{th} {month} {year}, at {hour}:{minute} {am_pm}"
-
-
 class Tweet:
 
     def __init__(self, d: dict):
@@ -149,7 +134,7 @@ class Tweet:
         s += self.full_text_repaired
         # Add metadata
         s += "\n("
-        s += format_datetime(self.timestamp)
+        s += self._format_datetime(self.timestamp)
         if self.is_reply:
             s += f", in reply to {self.reply_to_username}: {self.reply_to_tweet_id}"
         s += ")"
@@ -159,6 +144,12 @@ class Tweet:
         tweet = doc.createElement("div")
         tweet.setAttribute("class", "tweet")
         tweet.setAttribute("id", f"tweet{self.id}")
+        # Date
+        date = doc.createElement("div")
+        date.setAttribute("class", "timestamp")
+        time = self._format_datetime(self.timestamp)
+        date.appendChild(parseString(f'<a href="{tweet_dir_name}/{self.id}.html">{time}</a>').documentElement)
+        tweet.appendChild(date)
         # Reply
         if self.is_at_message:
             reply_note = doc.createElement("div")
@@ -180,17 +171,26 @@ class Tweet:
         # Images
         for m in self.media:
             tweet.appendChild(m.as_tag(doc, relative_depth))
-        # Date
-        date = doc.createElement("div")
-        date.setAttribute("class", "timestamp")
-        time = format_datetime(self.timestamp)
-        date.appendChild(parseString(f'<a href="{tweet_dir_name}/{self.id}.html">{time}</a>').documentElement)
-        tweet.appendChild(date)
         return tweet
 
     @classmethod
     def _parse_time(cls, time_str: str) -> datetime:
         return dt_parse(time_str)
+
+    @classmethod
+    def _format_datetime(cls, dt: datetime) -> str:
+        ordinal = defaultdict(lambda: 'th', {'1': 'st', '2': 'nd', '3': 'rd'})
+
+        day_name = f"{dt:%A}"  # Thursday
+        day = f"{dt:%-d}"  # 3
+        th = ordinal[day[-1]]  # rd
+        month = f"{dt:%B}"  # November
+        year = f"{dt:%Y}"  # 2022
+        hour = f"{dt:%-I}"  # 9
+        minute = f"{dt:%M}"  # 29
+        am_pm = f"{dt:%p}".lower()  # am
+
+        return f"{day_name} {day}{th} {month} {year}, at {hour}:{minute} {am_pm}"
 
     @classmethod
     def _parse_source(cls, source_str: str) -> str:
