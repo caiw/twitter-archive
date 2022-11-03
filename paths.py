@@ -7,7 +7,7 @@ media_dir_name: str = "media"
 thumbs_dir_name: str = "media_thumbs"
 
 saved_text_file_name: str = "tweets.txt"
-saved_html_file_name: str = "tweets.html"
+saved_html_file_name: str = "index.html"
 
 tweet_data_filename: str = "tweets.js"
 account_data_filename: str = "account.js"
