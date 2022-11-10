@@ -6,20 +6,31 @@ from xml.dom.minidom import getDOMImplementation, Document, Element
 from PIL import Image
 
 from entities import User
-from paths import tweet_data_filename, account_data_filename, tweet_dir_name, \
+from paths import tweet_data_filename_old, tweet_data_filename_new, account_data_filename, tweet_dir_name, \
     saved_text_file_name, saved_html_file_name, media_dir_name, thumbs_dir_name
 from tweets import Tweet
 
 
 def _json_from_js_file(js_file) -> list[dict]:
     js_lines: list[str] = js_file.readlines()
-    js_lines = ["[\n"] + js_lines[1:]  # Convert js var assignment to opening list
+    # Convert js var assignment to opening list
+    first_line = js_lines[0].strip()
+    if first_line.endswith("["):
+        js_lines = ["["] + js_lines[1:]
+    elif first_line.endswith("{") and "[" in first_line:
+        js_lines = ["[", "{"] + js_lines[1:]
+    else:
+        raise NotImplementedError()
     return json.loads("\n".join(js_lines))
 
 
 def load_tweets_from_data_dir(data_dir: Path) -> list[Tweet]:
     """Load a list of tweets from a twitter.js file."""
-    with Path(data_dir, tweet_data_filename).open("r") as tw_js_file:
+    if Path(data_dir, tweet_data_filename_new).exists():
+        p = Path(data_dir, tweet_data_filename_new)
+    else:
+        p = Path(data_dir, tweet_data_filename_old)
+    with p.open("r") as tw_js_file:
         tweets: list[dict] = _json_from_js_file(tw_js_file)
     return [Tweet(d) for d in tweets]
 
