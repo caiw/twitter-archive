@@ -6,7 +6,7 @@ from pathlib import Path
 from entities import User
 from paths import out_dir
 from save_load import load_tweets_from_data_dir, save_tweets_as_text, save_tweets_as_html_list, \
-    save_tweets_as_html_individual, load_user, copy_media_for_tweet
+    save_tweets_as_html_individual, load_user, copy_media_for_tweet, ArchiveMediaNotFoundError
 from tweets import Tweet
 
 
@@ -31,7 +31,7 @@ def main(dirs: list[str]):
         for tweet in tweets:
             try:
                 copy_media_for_tweet(tweet, user=user, from_dir=data_path, to_dir=out_dir, thumb_size_px=256)
-            except FileNotFoundError as e:
+            except ArchiveMediaNotFoundError as e:
                 print(f"Media missing for tweet {tweet.id}: {e}")
                 missing_media_tweet_ids.add(tweet.id)
                 continue

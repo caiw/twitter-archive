@@ -126,6 +126,10 @@ def _get_body(doc: Document, title: str, relative_depth: int) -> Element:
     return body
 
 
+class ArchiveMediaNotFoundError(FileNotFoundError):
+    pass
+
+
 def copy_media_for_tweet(tweet: Tweet, user: User, from_dir: Path, to_dir: Path, thumb_size_px: int) -> None:
     if tweet.is_retweet:
         return
@@ -133,6 +137,8 @@ def copy_media_for_tweet(tweet: Tweet, user: User, from_dir: Path, to_dir: Path,
         archive_media = Path(from_dir, media_archive_new_dir_name, f"{media.parent_tweet_id}-{media.name}{media.extension}")
         if not archive_media.exists():
             archive_media = Path(from_dir, media_archive_old_dir_name, f"{media.parent_tweet_id}-{media.name}{media.extension}")
+        if not archive_media.exists():
+            raise ArchiveMediaNotFoundError(str(archive_media))
         target_media_dir = Path(to_dir, user.name, media_target_dir_name)
         target_media_dir.mkdir(parents=False, exist_ok=True)
         if not Path(target_media_dir, archive_media.name).exists():
