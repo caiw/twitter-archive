@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from xml.dom.minidom import Document, Element
 
-from paths import media_dir_name, thumbs_dir_name
+from paths import thumbs_dir_name, media_target_dir_name
 
 
 @dataclass
@@ -90,7 +90,7 @@ class Media(ShortenedURL):
     @property
     def url_localised(self) -> str:
         extension = self.url_original[-3:]
-        return f"{media_dir_name}/{self.parent_tweet_id}-{self.name}.{extension}"
+        return f"{media_target_dir_name}/{self.parent_tweet_id}-{self.name}.{extension}"
 
     @property
     def thumb_url_localised(self) -> str:

@@ -7,7 +7,7 @@ from PIL import Image
 
 from entities import User
 from paths import tweet_data_filename_old, tweet_data_filename_new, account_data_filename, tweet_dir_name, \
-    saved_text_file_name, saved_html_file_name, media_dir_name, thumbs_dir_name
+    saved_text_file_name, saved_html_file_name, media_target_dir_name, thumbs_dir_name, media_archive_dir_name
 from tweets import Tweet
 
 
@@ -130,8 +130,8 @@ def copy_media(tweets: list[Tweet], user: User, from_dir: Path, to_dir: Path, th
         if tweet.is_retweet:
             continue
         for media in tweet.media:
-            archive_media = Path(from_dir, "tweets_media", f"{media.parent_tweet_id}-{media.name}{media.extension}")
-            target_media_dir = Path(to_dir, user.name, media_dir_name)
+            archive_media = Path(from_dir, media_archive_dir_name, f"{media.parent_tweet_id}-{media.name}{media.extension}")
+            target_media_dir = Path(to_dir, user.name, media_target_dir_name)
             target_media_dir.mkdir(parents=False, exist_ok=True)
             if not Path(target_media_dir, archive_media.name).exists():
                 copy(archive_media, target_media_dir)
