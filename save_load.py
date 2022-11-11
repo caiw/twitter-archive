@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 from shutil import copy
-from xml.dom.minidom import getDOMImplementation, Document, Element
+from xml.dom.minidom import getDOMImplementation, Document, Element, parseString
 
 from PIL import Image
 
@@ -79,6 +79,12 @@ def save_tweets_as_html_list(tweets: list[Tweet], user: User, to_dir: Path) -> N
 
     body = _get_body(doc, title="Tweets", relative_depth=relative_depth)
     body.appendChild(tweets_list_div)
+
+    footer = doc.createElement("div")
+    footer.setAttribute("class", "footer")
+    footer.appendChild(parseString(f'<p>Converted to HTML using <a href="https://github.com/caiw/twitter-archive">twitter-archive</a>.</p>').documentElement)
+    body.appendChild(footer)
+
     save_dir = Path(to_dir, user.name)
     with Path(save_dir, saved_html_file_name).open("wb") as out_file:
         out_file.write(doc.toxml(encoding="utf-8"))
