@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from datetime import datetime
+from re import sub
 from xml.dom.minidom import Document, parseString
 
 from dateutil.parser import parse as dt_parse
@@ -97,7 +98,8 @@ class Tweet:
 
     @property
     def is_retweet(self) -> bool:
-        return self.full_text_unrepaired.startswith("RT @")
+        # Should handle old- and new-style RTs
+        return "RT @" in self.full_text_unrepaired
 
     @property
     def is_quotetweet(self) -> bool:
@@ -121,6 +123,8 @@ class Tweet:
         s = self.full_text_unrepaired
         for entity in reversed(self.text_entities):
             s = entity.replace_in_string_as_html(s, doc)
+        # Replace html entities which failed to be replaced
+        s = sub(r"&([^agl])", r"&amp;\1", s)
         return s
 
     def __hash__(self):
