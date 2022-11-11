@@ -7,7 +7,8 @@ from PIL import Image
 
 from entities import User
 from paths import tweet_data_filename_old, tweet_data_filename_new, account_data_filename, tweet_dir_name, \
-    saved_text_file_name, saved_html_file_name, media_target_dir_name, thumbs_dir_name, media_archive_dir_name
+    saved_text_file_name, saved_html_file_name, media_target_dir_name, thumbs_dir_name, media_archive_new_dir_name, \
+    media_archive_old_dir_name
 from tweets import Tweet
 
 
@@ -125,20 +126,21 @@ def _get_body(doc: Document, title: str, relative_depth: int) -> Element:
     return body
 
 
-def copy_media(tweets: list[Tweet], user: User, from_dir: Path, to_dir: Path, thumb_size_px: int) -> None:
-    for tweet in tweets:
-        if tweet.is_retweet:
-            continue
-        for media in tweet.media:
-            archive_media = Path(from_dir, media_archive_dir_name, f"{media.parent_tweet_id}-{media.name}{media.extension}")
-            target_media_dir = Path(to_dir, user.name, media_target_dir_name)
-            target_media_dir.mkdir(parents=False, exist_ok=True)
-            if not Path(target_media_dir, archive_media.name).exists():
-                copy(archive_media, target_media_dir)
-            # Thumbnails
-            target_media_thumb_dir = Path(to_dir, user.name, thumbs_dir_name)
-            target_media_thumb_dir.mkdir(parents=False, exist_ok=True)
-            _save_thumb(archive_media, target_media_thumb_dir, thumb_size=thumb_size_px)
+def copy_media_for_tweet(tweet: Tweet, user: User, from_dir: Path, to_dir: Path, thumb_size_px: int) -> None:
+    if tweet.is_retweet:
+        return
+    for media in tweet.media:
+        archive_media = Path(from_dir, media_archive_new_dir_name, f"{media.parent_tweet_id}-{media.name}{media.extension}")
+        if not archive_media.exists():
+            archive_media = Path(from_dir, media_archive_old_dir_name, f"{media.parent_tweet_id}-{media.name}{media.extension}")
+        target_media_dir = Path(to_dir, user.name, media_target_dir_name)
+        target_media_dir.mkdir(parents=False, exist_ok=True)
+        if not Path(target_media_dir, archive_media.name).exists():
+            copy(archive_media, target_media_dir)
+        # Thumbnails
+        target_media_thumb_dir = Path(to_dir, user.name, thumbs_dir_name)
+        target_media_thumb_dir.mkdir(parents=False, exist_ok=True)
+        _save_thumb(archive_media, target_media_thumb_dir, thumb_size=thumb_size_px)
 
 
 def _save_thumb(archive_media, target_media_thumb_dir, thumb_size: int):
