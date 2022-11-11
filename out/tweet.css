@@ -4,13 +4,19 @@ body
 	padding: 0;
 }
 
+html,
+p
+{
+	font-family: sans-serif;
+}
+
 /* border */
 .tweets,
 .tweet,
 .tweet-individual-container
 {
 	border-width: .1pt;
-	border-color: rgba(0,0,0,0.2);
+	border-color: rgba(0.3,0.4,0.9,0.2);
 }
 
 .tweets,
@@ -20,9 +26,6 @@ body
     max-width: 512px;
     margin-left: auto;
     margin-right: auto;
-	border-right-style: solid;
-	border-left-style: solid;
-	border-bottom-style: solid;
 }
 
 .tweet-individual-container
@@ -33,13 +36,15 @@ body
 .tweet
 {
     background-color: aliceblue;
-    padding: 5px 10px 10px;
-	border-top-style: solid;
+    padding: 10px 10px 4px;
+	border-style: solid;
+	margin-bottom: 10px;
+	border-radius: 10px;
 }
 
 .tweet p
 {
-	margin: 5px 0 0;
+	margin: 0 0 3px;
 }
 
 .tweet .media-container
@@ -66,10 +71,10 @@ body
 .timestamp a
 {
 	text-decoration: none;
-	color: #000;
+	color: rgba(0,0,0,0.2);
 }
 
 .timestamp a:hover
 {
-	text-decoration: underline;
+	color: #000;
 }

@@ -148,12 +148,6 @@ class Tweet:
         tweet = doc.createElement("div")
         tweet.setAttribute("class", "tweet")
         tweet.setAttribute("id", f"tweet{self.id}")
-        # Date
-        date = doc.createElement("div")
-        date.setAttribute("class", "timestamp")
-        time = self._format_datetime(self.timestamp)
-        date.appendChild(parseString(f'<a href="{tweet_dir_name}/{self.id}.html">{time}</a>').documentElement)
-        tweet.appendChild(date)
         # Reply
         if self.is_at_message:
             reply_note = doc.createElement("div")
@@ -175,6 +169,12 @@ class Tweet:
         # Images
         for m in self.media:
             tweet.appendChild(m.as_tag(doc, relative_depth))
+        # Date
+        date = doc.createElement("div")
+        date.setAttribute("class", "timestamp")
+        time = self._format_datetime(self.timestamp)
+        date.appendChild(parseString(f'<a href="{tweet_dir_name}/{self.id}.html">{time}</a>').documentElement)
+        tweet.appendChild(date)
         return tweet
 
     @classmethod
